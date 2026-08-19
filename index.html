@@ -103,6 +103,10 @@
       flex: 0 0 auto;
       filter: brightness(1.28) contrast(1.18) saturate(1.05);
     }
+    .selected-coin[src*="10-cent"],
+    .selected-coin[src*="20-cent"] {
+      filter: brightness(1.55) contrast(1.55) saturate(1.08) drop-shadow(0 0 1px rgba(0,0,0,.45));
+    }
     .coin-grid {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -141,6 +145,10 @@
       object-fit: contain;
       filter: brightness(1.28) contrast(1.18) saturate(1.05);
     }
+    .coin-button[data-cents="10"] img,
+    .coin-button[data-cents="20"] img {
+      filter: brightness(1.55) contrast(1.55) saturate(1.08) drop-shadow(0 0 1px rgba(0,0,0,.45));
+    }
     .coin-label {
       font-size: clamp(20px, 4.7vw, 26px);
       line-height: 1.05;
@@ -163,7 +171,6 @@
     .clear-button:active { transform: scale(.99); }
     .clear-button:focus-visible { outline: 4px solid #6aa9ff; outline-offset: 2px; }
 
-    /* iPad-sized screens: one row of four large coin buttons. */
     @media (min-width: 700px) and (min-height: 600px) {
       .app { padding-left: max(28px, env(safe-area-inset-left)); padding-right: max(28px, env(safe-area-inset-right)); }
       .coin-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
@@ -172,7 +179,6 @@
       .selected-coin { width: 68px; height: 68px; }
     }
 
-    /* Keep landscape phones comfortable without switching to an iPad layout. */
     @media (max-height: 520px) and (orientation: landscape) {
       .app { padding-top: max(10px, env(safe-area-inset-top)); }
       h1 { font-size: 28px; margin-bottom: 10px; }
@@ -195,67 +201,38 @@
 <body>
   <main class="app">
     <h1>Money Calculator</h1>
-
     <section class="card total-card" aria-labelledby="totalLabel">
       <p class="eyebrow" id="totalLabel">TOTAL</p>
       <p id="total" aria-live="polite">$0.00</p>
     </section>
-
     <section class="card selected-card" aria-labelledby="selectedHeading">
       <h2 class="selected-heading" id="selectedHeading">COINS SELECTED</h2>
-      <div id="selectedCoins" aria-live="polite">
-        <span class="empty-state">No coins selected</span>
-      </div>
+      <div id="selectedCoins" aria-live="polite"><span class="empty-state">No coins selected</span></div>
     </section>
-
     <section class="coin-grid" aria-label="Choose a coin">
-      <button class="coin-button" type="button" data-cents="10" data-image="./images/10-cent.png" aria-label="Add 10 cents">
-        <span class="coin-image-wrap"><img src="./images/10-cent.png" alt="Singapore 10 cent coin"></span>
-        <span class="coin-label">10 cents</span>
-      </button>
-      <button class="coin-button" type="button" data-cents="20" data-image="./images/20-cent.png" aria-label="Add 20 cents">
-        <span class="coin-image-wrap"><img src="./images/20-cent.png" alt="Singapore 20 cent coin"></span>
-        <span class="coin-label">20 cents</span>
-      </button>
-      <button class="coin-button" type="button" data-cents="50" data-image="./images/50-cent.png" aria-label="Add 50 cents">
-        <span class="coin-image-wrap"><img src="./images/50-cent.png" alt="Singapore 50 cent coin"></span>
-        <span class="coin-label">50 cents</span>
-      </button>
-      <button class="coin-button" type="button" data-cents="100" data-image="./images/1-dollar.png" aria-label="Add 1 dollar">
-        <span class="coin-image-wrap"><img src="./images/1-dollar.png" alt="Singapore 1 dollar coin"></span>
-        <span class="coin-label">1 dollar</span>
-      </button>
+      <button class="coin-button" type="button" data-cents="10" data-image="./images/10-cent.png" aria-label="Add 10 cents"><span class="coin-image-wrap"><img src="./images/10-cent.png" alt="Singapore 10 cent coin"></span><span class="coin-label">10 cents</span></button>
+      <button class="coin-button" type="button" data-cents="20" data-image="./images/20-cent.png" aria-label="Add 20 cents"><span class="coin-image-wrap"><img src="./images/20-cent.png" alt="Singapore 20 cent coin"></span><span class="coin-label">20 cents</span></button>
+      <button class="coin-button" type="button" data-cents="50" data-image="./images/50-cent.png" aria-label="Add 50 cents"><span class="coin-image-wrap"><img src="./images/50-cent.png" alt="Singapore 50 cent coin"></span><span class="coin-label">50 cents</span></button>
+      <button class="coin-button" type="button" data-cents="100" data-image="./images/1-dollar.png" aria-label="Add 1 dollar"><span class="coin-image-wrap"><img src="./images/1-dollar.png" alt="Singapore 1 dollar coin"></span><span class="coin-label">1 dollar</span></button>
     </section>
-
     <button id="clearButton" class="clear-button" type="button">CLEAR</button>
   </main>
-
   <script>
     (() => {
       let totalCents = 0;
       const totalEl = document.getElementById('total');
       const selectedEl = document.getElementById('selectedCoins');
       const clearButton = document.getElementById('clearButton');
-
-      function updateTotal() {
-        totalEl.textContent = `$${(totalCents / 100).toFixed(2)}`;
-      }
-
-      function removeEmptyState() {
-        const empty = selectedEl.querySelector('.empty-state');
-        if (empty) empty.remove();
-      }
-
+      function updateTotal() { totalEl.textContent = `$${(totalCents / 100).toFixed(2)}`; }
+      function removeEmptyState() { const empty = selectedEl.querySelector('.empty-state'); if (empty) empty.remove(); }
       document.querySelectorAll('.coin-button').forEach(button => {
         button.addEventListener('click', () => {
           const cents = Number(button.dataset.cents);
           const src = button.dataset.image;
           const sourceImg = button.querySelector('img');
-
           totalCents += cents;
           updateTotal();
           removeEmptyState();
-
           const img = document.createElement('img');
           img.className = 'selected-coin';
           img.src = src;
@@ -263,7 +240,6 @@
           selectedEl.appendChild(img);
         });
       });
-
       clearButton.addEventListener('click', () => {
         totalCents = 0;
         updateTotal();
@@ -273,7 +249,6 @@
         empty.textContent = 'No coins selected';
         selectedEl.appendChild(empty);
       });
-
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
           navigator.serviceWorker.register('./service-worker.js').catch(() => {});
